@@ -46,9 +46,10 @@ enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
-    HOME("Home", Icons.Default.Home),
-    MY_LIST("My Lists", Icons.AutoMirrored.Filled.List),
-    BROWSE("Browse", Icons.Default.Search),
+    HOME("home", "Home", Icons.Default.Home),
+    MY_LIST("my_list", "My Lists", Icons.AutoMirrored.Filled.List),
+    BROWSE("browse", "Browse", Icons.Default.Search),
     // ⭐️ ADD THE MISSING STORE DESTINATION HERE
-    STORE("Store", Icons.Default.ShoppingCart)
+    STORE("store", "Store", Icons.Default.ShoppingCart),
+    PROFILE("profile", "Profile", Icons.Default.AccountBox),
 }

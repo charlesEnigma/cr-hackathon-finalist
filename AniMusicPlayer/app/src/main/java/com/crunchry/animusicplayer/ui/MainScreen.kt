@@ -53,7 +53,7 @@ fun MainScreen() {
                     Modifier.padding(innerPadding)
                 ) {
                     composable(AppDestinations.HOME.route) { HomeScreen() }
-                    composable(AppDestinations.FAVORITES.route) { FavoritesScreen() }
+                    composable(AppDestinations.MY_LIST.route) { FavoritesScreen() }
                     composable(AppDestinations.PROFILE.route) { ProfileScreen() }
                 }
             }
