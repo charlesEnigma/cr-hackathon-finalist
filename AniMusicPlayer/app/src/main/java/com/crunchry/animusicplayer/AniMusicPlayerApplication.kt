@@ -17,7 +17,7 @@ class AniMusicPlayerApplication : Application() {
         val channel = NotificationChannel(
             MEDIA_CHANNEL_ID,
             "Media Playback",
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_LOW
         )
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
