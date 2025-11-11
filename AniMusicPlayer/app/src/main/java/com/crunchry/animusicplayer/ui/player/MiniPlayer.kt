@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaMetadata
 import coil.compose.AsyncImage
 import com.crunchry.animusicplayer.data.ALBUM_ART_DESCRIPTION
-import com.crunchry.animusicplayer.data.NEXT_BUTTON_DESCRIPTION
-import com.crunchry.animusicplayer.data.PLAY_PAUSE_BUTTON_DESCRIPTION
+import com.crunchry.animusicplayer.data.NEXT_BUTTON_TEXT
+import com.crunchry.animusicplayer.data.PLAY_PAUSE_BUTTON_TEXT
 import com.crunchry.animusicplayer.data.SONG_ARTIST_TEXT
 import com.crunchry.animusicplayer.data.SONG_TITLE_TEXT
 
@@ -62,11 +62,11 @@ fun MiniPlayer(
         IconButton(onClick = onPlayPauseClick) {
             Icon(
                 imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                contentDescription = PLAY_PAUSE_BUTTON_DESCRIPTION
+                contentDescription = PLAY_PAUSE_BUTTON_TEXT
             )
         }
         IconButton(onClick = onNextClick) {
-            Icon(Icons.Default.SkipNext, contentDescription = NEXT_BUTTON_DESCRIPTION)
+            Icon(Icons.Default.SkipNext, contentDescription = NEXT_BUTTON_TEXT)
         }
     }
 }
