@@ -5,9 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -38,12 +40,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 enum class AppDestinations(
     val route: String,
     val label: String,
     val icon: ImageVector,
 ) {
-    HOME("home", "Home", Icons.Default.Home),
-    FAVORITES("favorites", "Favorites", Icons.Default.Favorite),
-    PROFILE("profile", "Profile", Icons.Default.AccountBox),
+    HOME("Home", Icons.Default.Home),
+    MY_LIST("My Lists", Icons.AutoMirrored.Filled.List),
+    BROWSE("Browse", Icons.Default.Search),
+    // ⭐️ ADD THE MISSING STORE DESTINATION HERE
+    STORE("Store", Icons.Default.ShoppingCart)
 }
