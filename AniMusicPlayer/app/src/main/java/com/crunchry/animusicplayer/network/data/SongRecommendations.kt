@@ -11,12 +11,14 @@ data class SongRecommendations(
 
 @Serializable
 data class Song(
-    @SerialName("song_id")
+    @SerialName("id")
     val songId: String,
     @SerialName("title")
     val title: String,
     @SerialName("artist")
     val artist: String,
+    @SerialName("thumbnail")
+    val albumArtUrl: String,
     @SerialName("score")
     val score: Double,
 )

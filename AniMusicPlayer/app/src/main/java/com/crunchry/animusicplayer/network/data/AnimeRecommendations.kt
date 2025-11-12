@@ -11,10 +11,12 @@ data class AnimeRecommendations(
 
 @Serializable
 data class Anime(
-    @SerialName("anime_id")
+    @SerialName("id")
     val animeId: String,
     @SerialName("title")
     val title: String,
+    @SerialName("thumbnail")
+    val posterUrl: String,
     @SerialName("score")
     val score: Double,
 )

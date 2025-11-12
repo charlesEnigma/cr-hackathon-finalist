@@ -15,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -28,6 +27,8 @@ import com.crunchry.animusicplayer.network.repository.SongRecommendationReposito
 import com.crunchry.animusicplayer.ui.theme.AniMusicPlayerTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import com.crunchry.animusicplayer.ui.MainScreen
+import com.crunchry.animusicplayer.ui.theme.CrMainTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -39,8 +40,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AniMusicPlayerTheme {
-                AniMusicPlayerApp()
+            CrMainTheme {
+                MainScreen()
             }
         }
     }
