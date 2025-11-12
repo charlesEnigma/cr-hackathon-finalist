@@ -61,7 +61,7 @@ class HomeViewModel @Inject constructor(
             MediaItem(
                 title = song.title,
                 subtitle = song.artist,
-                videoUri = song.albumArtUrl,
+                videoUri = "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd",
                 artist = "",
                 artworkUri = song.albumArtUrl
             )

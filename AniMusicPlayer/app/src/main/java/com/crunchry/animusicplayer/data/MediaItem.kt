@@ -8,6 +8,6 @@ data class MediaItem(
     val subtitle: String,
     val artist: String = "",
     val artworkUri: String,
-    val videoUri: String,
+    val videoUri: String = "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd",
     val isFavorite: Boolean = false
 )
