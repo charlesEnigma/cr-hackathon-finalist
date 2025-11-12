@@ -8,18 +8,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.crunchry.animusicplayer.R
 import com.crunchry.animusicplayer.data.MediaItem
 import com.crunchry.animusicplayer.ui.theme.CrColors
 
 @Composable
 fun MediaCard(item: MediaItem, width: Dp, height: Dp, isNetwork: Boolean) {
+    val model: Any? = remember(item.imageUrl, isNetwork) {
+        val numeric = item.imageUrl.toIntOrNull()
+        if (!isNetwork && numeric != null) numeric else item.imageUrl.takeIf { it.isNotBlank() }
+    }
     Column(
         modifier = Modifier
             .width(width)
@@ -31,16 +38,11 @@ fun MediaCard(item: MediaItem, width: Dp, height: Dp, isNetwork: Boolean) {
             modifier = Modifier
                 .height(height)
                 .fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder for image/video thumbnail
+            colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf)
         ) {
             Box(contentAlignment = Alignment.TopEnd) {
                 AsyncImage(
-                    model = if (isNetwork) {
-                        // TODO: Handle network image
-                        ""
-                    } else {
-                        item.imageUrl.toInt()
-                    },
+                    model = model,
                     contentDescription = item.title,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
@@ -111,31 +113,29 @@ fun ContinueWatchingCard(item: MediaItem, width: Dp) {
 /** Square playlist card supporting navigation click. */
 @Composable
 fun PlaylistCard(item: MediaItem, size: Dp, isNetwork: Boolean, onClick: (MediaItem) -> Unit = {}) {
+    val model: Any? = remember(item.imageUrl, isNetwork) {
+        val numeric = item.imageUrl.toIntOrNull()
+        if (!isNetwork && numeric != null) numeric else item.imageUrl.takeIf { it.isNotBlank() }
+    }
     Column(
         modifier = Modifier
             .width(size)
             .padding(end = 8.dp)
-            .clickable { onClick(item) } // we need to navigate to the playlist
+            .clickable { onClick(item) }
     ) {
         Card(
             shape = RoundedCornerShape(4.dp),
             modifier = Modifier
                 .size(size)
                 .fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder image
+            colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf)
         ) {
             AsyncImage(
-                model = if (isNetwork) {
-                    // TODO: Handle network image
-                    ""
-                } else {
-                    item.imageUrl.toInt()
-                },
+                model = model,
                 contentDescription = item.title,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-            // Image/Color for the Playlist
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = item.title, color = CrColors.Neutral.White, fontSize = 12.sp, maxLines = 1)

@@ -20,3 +20,12 @@ val shows = listOf(
     MediaItem("Solo Leveling", "Subtitled", R.drawable.show_solo_leveling.toString())
 )
 
+val continueWatching = listOf(
+    MediaItem("Demon Slayer", "Demon Slayer", R.drawable.continue_watching_demon_slayer.toString()),
+    MediaItem("Imy Hero", "Imy Hero", R.drawable.continue_watching_imy_hero.toString()),
+    MediaItem("Initial D", "Initial D", R.drawable.continue_watching_initial_d.toString()),
+    MediaItem("My Hero Academia", "My Hero Academia", R.drawable.continue_watching_my_hero_academia.toString())
+)
+
+
+
