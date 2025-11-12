@@ -17,8 +17,8 @@ import androidx.navigation.compose.rememberNavController
 import com.crunchry.animusicplayer.SplashScreenV2
 import com.crunchry.animusicplayer.data.Song
 import com.crunchry.animusicplayer.navigation.Screen
-import com.crunchry.animusicplayer.ui.home.HomeScreen
-import com.crunchry.animusicplayer.ui.playlist.PlaylistScreen
+import com.crunchry.animusicplayer.ui.presentation.home.HomeScreen
+import com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistScreen
 import com.crunchry.animusicplayer.ui.screens.BrowseScreen
 import com.crunchry.animusicplayer.ui.screens.FavoritesScreen
 import com.crunchry.animusicplayer.ui.screens.ProfileScreen

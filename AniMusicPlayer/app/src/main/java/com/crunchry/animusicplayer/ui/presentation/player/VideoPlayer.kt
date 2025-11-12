@@ -1,4 +1,4 @@
-package com.crunchry.animusicplayer.ui.player
+package com.crunchry.animusicplayer.ui.presentation.player
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

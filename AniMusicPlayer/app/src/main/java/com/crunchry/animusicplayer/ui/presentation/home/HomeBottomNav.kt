@@ -1,4 +1,4 @@
-package com.crunchry.animusicplayer.ui.home
+package com.crunchry.animusicplayer.ui.presentation.home
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home

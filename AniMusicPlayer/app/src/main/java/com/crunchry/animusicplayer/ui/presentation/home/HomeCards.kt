@@ -1,18 +1,35 @@
-package com.crunchry.animusicplayer.ui.home
+package com.crunchry.animusicplayer.ui.presentation.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.crunchry.animusicplayer.data.MediaItem
 import com.crunchry.animusicplayer.ui.theme.CrColors
 
@@ -32,14 +49,24 @@ fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
             colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder for image/video thumbnail
         ) {
             Box(contentAlignment = Alignment.TopEnd) {
-                Text(
-                    text = item.subtitle,
-                    color = CrColors.Neutral.White,
-                    fontSize = 8.sp,
-                    modifier = Modifier
-                        .background(CrColors.Neutral.Black60, RoundedCornerShape(bottomStart = 4.dp))
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                AsyncImage(
+                    model = item.imageUrl,
+                    placeholder = rememberVectorPainter(Icons.Default.MusicNote),
+                    error = rememberVectorPainter(Icons.Default.MusicNote),
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
+                if (item.subtitle.isNotBlank()) {
+                    Text(
+                        text = item.subtitle,
+                        color = CrColors.Neutral.White,
+                        fontSize = 8.sp,
+                        modifier = Modifier
+                            .background(CrColors.Neutral.Black60, RoundedCornerShape(bottomStart = 4.dp))
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -111,7 +138,14 @@ fun PlaylistCard(item: MediaItem, size: Dp, onClick: (MediaItem) -> Unit = {}) {
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder image
         ) {
-            // Image/Color for the Playlist
+            AsyncImage(
+                model = item.imageUrl,
+                placeholder = rememberVectorPainter(Icons.Default.MusicNote),
+                error = rememberVectorPainter(Icons.Default.MusicNote),
+                contentDescription = item.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = item.title, color = CrColors.Neutral.White, fontSize = 12.sp, maxLines = 1)

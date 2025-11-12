@@ -1,4 +1,4 @@
-package com.crunchry.animusicplayer.ui.home
+package com.crunchry.animusicplayer.ui.presentation.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
