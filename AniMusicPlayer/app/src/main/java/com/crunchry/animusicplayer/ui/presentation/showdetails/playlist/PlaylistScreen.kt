@@ -1,9 +1,11 @@
-package com.crunchry.animusicplayer.ui.presentation.showdetails.playlist
-
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +29,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -44,7 +46,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -52,22 +53,25 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
-import com.crunchry.animusicplayer.data.Song
-import com.crunchry.animusicplayer.data.sampleSongs
+import com.crunchry.animusicplayer.data.MediaItem
 import com.crunchry.animusicplayer.ui.presentation.player.MiniPlayer
 import com.crunchry.animusicplayer.ui.presentation.player.PlayerViewModel
+import com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistViewModel
 import com.crunchry.animusicplayer.ui.theme.CrColors
-import kotlin.math.roundToInt
 import com.crunchry.animusicplayer.util.enterPipMode
+import kotlin.math.roundToInt
 
 @UnstableApi
 @Composable
 fun PlaylistScreen(
-    songs: List<Song>,
+    selectedSongTitle: String,
     onBack: () -> Unit,
     isInPipMode: Boolean,
+    playlistViewModel: PlaylistViewModel = hiltViewModel(),
     playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
+    val uiState = playlistViewModel.uiState
+    val songs = uiState.songs
     val context = LocalContext.current
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
     val currentMediaItem by playerViewModel.currentMediaItem.collectAsStateWithLifecycle()
@@ -96,64 +100,68 @@ fun PlaylistScreen(
             .background(CrColors.Neutral.Base)
             .nestedScroll(nestedScrollConnection),
     ) {
-        val playlistTitle = "Shonen Isekai"
         val playlistDescription = "Songs recommended from the anime you watch."
         val playlistCreator = "Crunchyroll"
-        val songCount = 32
 
-        SongList(songs, headerHeight)
+        SongList(songs, headerHeight) { song ->
+            // TODO
+        }
         CollapsingToolbar(
             onBack,
-            playlistTitle,
+            selectedSongTitle,
             playlistDescription,
             playlistCreator,
-            songCount,
+            songs.size,
             headerOffsetHeightPx.floatValue,
             headerHeight,
+            songs
         )
-        if (!isInPipMode) {
-            if (currentMediaItem != null) {
-                val collapsedThreshold = 0.2f
-                val alpha = ((headerOffsetHeightPx.floatValue / headerHeightPx) / (1 - collapsedThreshold) + 1).coerceIn(0f, 1f)
-                MiniPlayer(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .graphicsLayer { this.alpha = alpha }
-                        .background(CrColors.Neutral.Base),
-                    mediaMetadata = currentMediaItem,
-                    isPlaying = isPlaying,
-                    onPlayPauseClick = { playerViewModel.onPlayPauseClick() },
-                    onNextClick = { playerViewModel.onNextClick() },
-                    onPipMe = { enterPipMode(context) }
-                )
-            } else {
-                PlaybackButton(
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    headerOffset = headerOffsetHeightPx.floatValue,
-                    headerHeight = headerHeight,
-                    onStartListening = { playerViewModel.addMediaItemsAndPlay(songs) }
-                )
+        if (uiState.isLoaded) {
+            if (!isInPipMode) {
+                if (currentMediaItem != null) {
+                    val collapsedThreshold = 0.2f
+                    val alpha = ((headerOffsetHeightPx.floatValue / headerHeightPx) / (1 - collapsedThreshold) + 1).coerceIn(0f, 1f)
+                    MiniPlayer(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .graphicsLayer { this.alpha = alpha }
+                            .background(CrColors.Neutral.Base),
+                        mediaMetadata = currentMediaItem,
+                        isPlaying = isPlaying,
+                        onPlayPauseClick = { playerViewModel.onPlayPauseClick() },
+                        onNextClick = { playerViewModel.onNextClick() },
+                        onPipMe = { enterPipMode(context) }
+                    )
+                } else {
+                    PlaybackButton(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        onPlayClick = { playerViewModel.addMediaItemsAndPlay(songs) },
+                        onBookmarkClick = {}
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun HeroPoster(onBack: () -> Unit) {
+fun HeroPoster(onBack: () -> Unit, songs: List<MediaItem>) {
     Box(
-        modifier =
-        Modifier
+        modifier = Modifier
             .fillMaxWidth(),
     ) {
         AsyncImage(
-            model = sampleSongs[0].artworkUri,
+            model = songs.firstOrNull()?.artworkUri,
             contentDescription = "Playlist Poster",
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
             contentScale = ContentScale.Crop
         )
-        IconButton(onClick = onBack) {
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
@@ -203,9 +211,9 @@ fun HeroDetails(
 fun PlaylistTabs() {
     Row(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.Start,
     ) {
         TabItem("Playlist", isSelected = true)
@@ -230,24 +238,38 @@ fun TabItem(
 }
 
 @Composable
-fun SongList(songs: List<Song>, headerHeight: Dp) {
+fun SongList(item: List<MediaItem>, headerHeight: Dp, onSongClick: (MediaItem) -> Unit) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(top = headerHeight)
     ) {
-        items(songs) { song ->
-            SongListItem(song)
+        items(item) { song ->
+            SongListItem(song, onClick = { onSongClick(song) })
         }
     }
 }
 
 @Composable
-fun SongListItem(song: Song) {
+fun SongListItem(mediaItem: MediaItem, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isPressed) Color.DarkGray else Color.Transparent,
+        animationSpec = tween(durationMillis = 100),
+        label = "background"
+    )
+
     Row(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp, horizontal = 16.dp),
+        Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null, // Disable ripple effect
+                onClick = onClick
+            )
+            .padding(vertical = 10.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
@@ -259,17 +281,17 @@ fun SongListItem(song: Song) {
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = song.title,
+                text = mediaItem.title,
                 color = CrColors.Neutral.White,
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = song.artist,
+                text = mediaItem.artist,
                 color = CrColors.Neutral.SilverChalice,
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        if (song.isFavorite) {
+        if (mediaItem.isFavorite) {
             Icon(
                 Icons.Filled.Star,
                 contentDescription = "Favorite",
@@ -299,11 +321,8 @@ fun CollapsingToolbar(
     songCount: Int,
     headerOffset: Float,
     headerHeight: Dp,
+    songs: List<MediaItem>
 ) {
-    val headerHeightPx = with(LocalDensity.current) { headerHeight.toPx() }
-    val collapsedThreshold = 0.2f
-    val alpha = ((headerOffset / headerHeightPx) / (1 - collapsedThreshold) + 1).coerceIn(0f, 1f)
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -311,7 +330,7 @@ fun CollapsingToolbar(
             .offset { IntOffset(0, headerOffset.roundToInt()) }
             .background(CrColors.Neutral.Base)
     ) {
-        HeroPoster(onBack = onBack)
+        HeroPoster(onBack = onBack, songs = songs)
         HeroDetails(
             title = title,
             description = description,
@@ -325,20 +344,14 @@ fun CollapsingToolbar(
 @Composable
 fun PlaybackButton(
     modifier: Modifier = Modifier,
-    headerOffset: Float,
-    headerHeight: Dp,
-    onStartListening: () -> Unit
+    onPlayClick: () -> Unit,
+    onBookmarkClick: () -> Unit
 ) {
-    val headerHeightPx = with(LocalDensity.current) { headerHeight.toPx() }
-    val collapsedThreshold = 0.2f
-    val alpha = ((headerOffset / headerHeightPx) / (1 - collapsedThreshold) + 1).coerceIn(0f, 1f)
-
     Box(
         modifier =
         modifier
             .fillMaxWidth()
             .height(64.dp)
-            .graphicsLayer { this.alpha = alpha }
             .background(CrColors.Neutral.Base),
     ) {
         Row(
@@ -349,15 +362,16 @@ fun PlaybackButton(
                 Modifier
                     .weight(1f)
                     .background(CrColors.Brand.Orange)
-                    .clickable { onStartListening() }
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .clickable(onClick = onPlayClick)
+                    .padding(3.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Icon(
                     Icons.Filled.PlayArrow,
                     contentDescription = null,
-                    tint = CrColors.Neutral.White,
+                    tint = CrColors.Neutral.Black,
                     modifier = Modifier.size(24.dp),
                 )
                 Spacer(Modifier.width(8.dp))
@@ -373,7 +387,9 @@ fun PlaybackButton(
                 Modifier
                     .width(64.dp)
                     .background(CrColors.Neutral.DireWolf)
-                    .fillMaxHeight(),
+                    .fillMaxHeight()
+                    .clickable(onClick = onBookmarkClick)
+                    .padding(3.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

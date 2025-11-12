@@ -1,5 +1,6 @@
 package com.crunchry.animusicplayer.ui
 
+import PlaylistScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,23 +14,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.crunchry.animusicplayer.SplashScreenV2
-import com.crunchry.animusicplayer.data.Song
 import com.crunchry.animusicplayer.navigation.Screen
 import com.crunchry.animusicplayer.ui.presentation.home.HomeScreen
 import com.crunchry.animusicplayer.ui.presentation.player.PlayerViewModel
 import com.crunchry.animusicplayer.ui.presentation.player.VideoPlayer
-import com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistScreen
 import com.crunchry.animusicplayer.ui.screens.BrowseScreen
 import com.crunchry.animusicplayer.ui.screens.FavoritesScreen
 import com.crunchry.animusicplayer.ui.screens.ProfileScreen
@@ -68,8 +68,9 @@ fun MainScreen(
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
 
-            val showNavigationSuite =
-                Screen.mainScreens.any { it.route == currentDestination?.route }
+            val showNavigationSuite = currentDestination?.hierarchy?.any { dest ->
+                Screen.mainScreens.any { it.route == dest.route } || dest.route == Screen.Playlist.route
+            } == true
 
             NavigationSuiteScaffold(
                 navigationSuiteItems = {
@@ -118,21 +119,25 @@ fun MainScreen(
                         composable(Screen.Browse.route) { BrowseScreen() }
                         composable(Screen.Store.route) { StoreScreen() }
                         composable(Screen.Profile.route) { ProfileScreen() }
-                        composable(Screen.Playlist.route) { backStackEntry ->
-                            val itemTitle = backStackEntry.arguments?.getString("itemTitle")
-                            val songs = List(10) {
-                                Song(
-                                    "Song $it",
-                                    "Artist $it",
-                                    it % 3 == 0,
-                                    artworkUri = "https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217".toUri(),
-                                    videoUri = "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd".toUri()
-                                )
+                        composable(
+                            route = Screen.Playlist.route,
+                            arguments = listOf(
+                                navArgument("selectedSongTitle") {
+                                    type = NavType.StringType
+                                    nullable = true
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val selectedSongTitle = backStackEntry.arguments?.getString("selectedSongTitle")
+                            val navGraphBackStackEntry = remember(backStackEntry) {
+                                navController.getBackStackEntry(Screen.Home.route)
                             }
+                            val playlistViewModel: com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistViewModel = hiltViewModel(navGraphBackStackEntry)
                             PlaylistScreen(
-                                songs = songs,
+                                selectedSongTitle = selectedSongTitle ?: "",
                                 onBack = { navController.popBackStack() },
                                 isInPipMode = isInPipMode,
+                                playlistViewModel = playlistViewModel,
                                 playerViewModel = playerViewModel
                             )
                         }
