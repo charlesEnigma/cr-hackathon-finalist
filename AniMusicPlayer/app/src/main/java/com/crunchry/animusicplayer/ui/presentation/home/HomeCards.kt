@@ -51,6 +51,8 @@ fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
             Box(contentAlignment = Alignment.TopEnd) {
                 AsyncImage(
                     model = item.imageUrl,
+                    placeholder = rememberVectorPainter(Icons.Default.MusicNote),
+                    error = rememberVectorPainter(Icons.Default.MusicNote),
                     contentDescription = item.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -138,6 +140,8 @@ fun PlaylistCard(item: MediaItem, size: Dp, onClick: (MediaItem) -> Unit = {}) {
         ) {
             AsyncImage(
                 model = item.imageUrl,
+                placeholder = rememberVectorPainter(Icons.Default.MusicNote),
+                error = rememberVectorPainter(Icons.Default.MusicNote),
                 contentDescription = item.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
