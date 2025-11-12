@@ -7,55 +7,49 @@ import com.crunchry.animusicplayer.network.data.AnimeRecommendations
 import com.crunchry.animusicplayer.network.data.SongRecommendations
 import com.crunchry.animusicplayer.network.repository.SongRecommendationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+
+data class HomeUiState(
+    val isLoading: Boolean = true,
+    val animeRecommendations: List<MediaItem> = emptyList(),
+    val songRecommendations: List<MediaItem> = emptyList(),
+    val error: String? = null
+)
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val songRecommendationRepository: SongRecommendationRepository
 ) : ViewModel() {
 
-    private val _animeRecommendations = MutableStateFlow<List<MediaItem>>(emptyList())
-    val animeRecommendations: StateFlow<List<MediaItem>> = _animeRecommendations.asStateFlow()
+    private val animeFlow = songRecommendationRepository.getAnimeRecommendation(1).map { it.toMediaItems() }
+    private val songFlow = songRecommendationRepository.getSongRecommendation(1).map { it.toMediaItems() }
 
-    private val _songRecommendations = MutableStateFlow<List<MediaItem>>(emptyList())
-    val songRecommendations: StateFlow<List<MediaItem>> = _songRecommendations.asStateFlow()
-
-    init {
-        getAnimeRecommendations()
-        getSongRecommendations()
+    val uiState: StateFlow<HomeUiState> = combine(animeFlow, songFlow) { anime, songs ->
+        HomeUiState(
+            isLoading = false,
+            animeRecommendations = anime,
+            songRecommendations = songs
+        )
     }
-
-    private fun getAnimeRecommendations() {
-        viewModelScope.launch {
-            songRecommendationRepository.getAnimeRecommendation(1)
-                .map { it.toMediaItems() }
-                .onEach { _animeRecommendations.value = it }
-                .launchIn(viewModelScope)
-        }
-    }
-
-    private fun getSongRecommendations() {
-        viewModelScope.launch {
-            songRecommendationRepository.getSongRecommendation(1)
-                .map { it.toMediaItems() }
-                .onEach { _songRecommendations.value = it }
-                .launchIn(viewModelScope)
-        }
-    }
+        .catch { e -> emit(HomeUiState(isLoading = false, error = e.message)) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = HomeUiState()
+        )
 
     private fun AnimeRecommendations.toMediaItems(): List<MediaItem> {
         return recommendations.map { anime ->
             MediaItem(
                 title = anime.title,
                 subtitle = "",
-                imageUrl = anime.posterUrl
+                imageUrl = anime.posterTall
             )
         }
     }

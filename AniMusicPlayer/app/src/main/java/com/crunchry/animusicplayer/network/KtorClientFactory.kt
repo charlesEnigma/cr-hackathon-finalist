@@ -100,7 +100,7 @@ object Constants {
 @Suppress("TooGenericExceptionCaught")
 suspend inline fun <reified T> HttpClient.sendPost(
     path: String,
-    requestBuilder: HttpRequestBuilder.() -> Unit
+    requestBuilder: HttpRequestBuilder.() -> Unit = {}
 ): ApiResult<T> {
     return try {
         val response: HttpResponse = this.post {

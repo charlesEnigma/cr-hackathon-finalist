@@ -5,7 +5,7 @@ import com.crunchry.animusicplayer.network.data.SongRecommendations
 import kotlinx.coroutines.flow.Flow
 
 interface SongRecommendationRepository {
-    suspend fun getAnimeRecommendation(userId: Int) : Flow<AnimeRecommendations>
+    fun getAnimeRecommendation(userId: Int) : Flow<AnimeRecommendations>
 
-    suspend fun getSongRecommendation(userId: Int) : Flow<SongRecommendations>
+    fun getSongRecommendation(userId: Int) : Flow<SongRecommendations>
 }

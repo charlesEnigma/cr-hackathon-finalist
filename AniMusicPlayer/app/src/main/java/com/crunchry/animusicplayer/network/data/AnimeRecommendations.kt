@@ -15,10 +15,8 @@ data class Anime(
     val animeId: String,
     @SerialName("title")
     val title: String,
-    @SerialName("thumbnail")
-    val posterUrl: String,
+    @SerialName("poster_tall")
+    val posterTall: String,
     @SerialName("score")
     val score: Double,
 )
-
-

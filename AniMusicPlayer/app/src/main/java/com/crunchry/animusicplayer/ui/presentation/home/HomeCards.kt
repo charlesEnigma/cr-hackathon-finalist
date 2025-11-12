@@ -49,14 +49,22 @@ fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
             colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder for image/video thumbnail
         ) {
             Box(contentAlignment = Alignment.TopEnd) {
-                Text(
-                    text = item.subtitle,
-                    color = CrColors.Neutral.White,
-                    fontSize = 8.sp,
-                    modifier = Modifier
-                        .background(CrColors.Neutral.Black60, RoundedCornerShape(bottomStart = 4.dp))
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                AsyncImage(
+                    model = item.imageUrl,
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
+                if (item.subtitle.isNotBlank()) {
+                    Text(
+                        text = item.subtitle,
+                        color = CrColors.Neutral.White,
+                        fontSize = 8.sp,
+                        modifier = Modifier
+                            .background(CrColors.Neutral.Black60, RoundedCornerShape(bottomStart = 4.dp))
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
@@ -128,26 +136,12 @@ fun PlaylistCard(item: MediaItem, size: Dp, onClick: (MediaItem) -> Unit = {}) {
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder image
         ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                if (item.imageUrl.isNotBlank()) {
-                    AsyncImage(
-                        model = item.imageUrl,
-                        contentDescription = item.title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
-                    Icon(
-                        painter = rememberVectorPainter(image = Icons.Default.MusicNote),
-                        contentDescription = "Playlist",
-                        tint = CrColors.Neutral.White,
-                        modifier = Modifier.size(48.dp)
-                    )
-                }
-            }
+            AsyncImage(
+                model = item.imageUrl,
+                contentDescription = item.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = item.title, color = CrColors.Neutral.White, fontSize = 12.sp, maxLines = 1)
