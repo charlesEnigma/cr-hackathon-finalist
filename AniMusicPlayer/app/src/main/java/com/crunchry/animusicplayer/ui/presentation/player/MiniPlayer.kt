@@ -1,5 +1,6 @@
 package com.crunchry.animusicplayer.ui.presentation.player
 
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaMetadata
 import coil.compose.AsyncImage
@@ -35,11 +37,18 @@ fun MiniPlayer(
     isPlaying: Boolean,
     onPlayPauseClick: () -> Unit,
     onNextClick: () -> Unit,
+    onPipMe: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { _, _ ->
+                    onPipMe()
+                }
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
