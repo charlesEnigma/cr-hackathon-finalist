@@ -15,9 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import kotlinx.collections.immutable.PersistentList
 import com.crunchry.animusicplayer.data.MediaItem
+import com.crunchry.animusicplayer.data.shows
 import com.crunchry.animusicplayer.ui.theme.CrColors
 import com.crunchry.animusicplayer.ui.theme.CrMainTheme
+import kotlinx.collections.immutable.toPersistentList
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -26,13 +29,17 @@ fun HomeScreen(navController: NavController) {
     }
 }
 
+// Temporary function to mimic ViewModel behavior
+private fun getRandomShows(): PersistentList<MediaItem> {
+    return shows.shuffled().take(10).toPersistentList()
+}
+
 @Composable
 fun CrunchyrollHomeScreen(navController: NavController) {
     // Define the mock data (as defined in Section 1)
-    val mockTopPicks = List(5) { MediaItem("Item $it", "Subtitled", "") }
-    val mockContinueWatching = List(3) { MediaItem("Initial D", "S1, E1", "") }
+    val mockContinueWatching = List(4) { MediaItem("Initial D", "S1, E1", "") }
     val mockPlaylists = List(4) { MediaItem("Songs", "Classics", "") }
-    val mockTrending = List(5) { MediaItem("One Piece", "Subtitled", "") }
+
 
     Scaffold(
         topBar = { HomeAppBar() },
@@ -51,10 +58,11 @@ fun CrunchyrollHomeScreen(navController: NavController) {
 
             // 2. Top Picks for You Section
             item {
+                val mockTopPicks = getRandomShows()
                 SectionHeader(title = "Top picks for you")
                 LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
                     items(mockTopPicks) { item ->
-                        MediaCard(item = item, width = 120.dp, height = 180.dp)
+                        MediaCard(item = item, width = 120.dp, height = 180.dp, isNetwork = false)
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -73,10 +81,11 @@ fun CrunchyrollHomeScreen(navController: NavController) {
 
             // 4. Crunchyroll Curated Playlists Section
             item {
+                val playlistItems = getRandomShows()
                 SectionHeader(title = "♬ Crunchyroll Curated Playlists")
                 LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
-                    items(mockPlaylists) { item ->
-                        PlaylistCard(item = item, size = 150.dp) {
+                    items(playlistItems) { item ->
+                        PlaylistCard(item = item, size = 150.dp, isNetwork = false) {
                             navController.navigate("playlist/${item.title}")
                         }
                     }
@@ -86,10 +95,11 @@ fun CrunchyrollHomeScreen(navController: NavController) {
 
             // 5. Trending in the United States Section
             item {
+                val mockTrending = getRandomShows()
                 SectionHeader(title = "Trending in the United States")
                 LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
                     items(mockTrending) { item ->
-                        MediaCard(item = item, width = 120.dp, height = 180.dp)
+                        MediaCard(item = item, width = 120.dp, height = 180.dp, isNetwork = false)
                     }
                 }
                 Spacer(modifier = Modifier.height(32.dp))

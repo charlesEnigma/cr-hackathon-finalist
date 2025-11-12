@@ -56,6 +56,9 @@ dependencies {
     implementation(libs.bundles.media3)
     implementation(libs.coil)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.kotlinx.collections.immutable)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

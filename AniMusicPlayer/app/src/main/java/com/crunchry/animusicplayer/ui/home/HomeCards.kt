@@ -10,14 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.crunchry.animusicplayer.data.MediaItem
 import com.crunchry.animusicplayer.ui.theme.CrColors
 
 @Composable
-fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
+fun MediaCard(item: MediaItem, width: Dp, height: Dp, isNetwork: Boolean) {
     Column(
         modifier = Modifier
             .width(width)
@@ -32,8 +34,19 @@ fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
             colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder for image/video thumbnail
         ) {
             Box(contentAlignment = Alignment.TopEnd) {
+                AsyncImage(
+                    model = if (isNetwork) {
+                        // TODO: Handle network image
+                        ""
+                    } else {
+                        item.imageUrl.toInt()
+                    },
+                    contentDescription = item.title,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
                 Text(
-                    text = item.subtitle,
+                    text = item.title,
                     color = CrColors.Neutral.White,
                     fontSize = 8.sp,
                     modifier = Modifier
@@ -97,7 +110,7 @@ fun ContinueWatchingCard(item: MediaItem, width: Dp) {
 
 /** Square playlist card supporting navigation click. */
 @Composable
-fun PlaylistCard(item: MediaItem, size: Dp, onClick: (MediaItem) -> Unit = {}) {
+fun PlaylistCard(item: MediaItem, size: Dp, isNetwork: Boolean, onClick: (MediaItem) -> Unit = {}) {
     Column(
         modifier = Modifier
             .width(size)
@@ -111,6 +124,17 @@ fun PlaylistCard(item: MediaItem, size: Dp, onClick: (MediaItem) -> Unit = {}) {
                 .fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder image
         ) {
+            AsyncImage(
+                model = if (isNetwork) {
+                    // TODO: Handle network image
+                    ""
+                } else {
+                    item.imageUrl.toInt()
+                },
+                contentDescription = item.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
             // Image/Color for the Playlist
         }
         Spacer(modifier = Modifier.height(4.dp))
