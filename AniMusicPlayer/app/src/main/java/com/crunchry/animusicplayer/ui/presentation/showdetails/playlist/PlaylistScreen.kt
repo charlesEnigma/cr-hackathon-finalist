@@ -1,6 +1,8 @@
 package com.crunchry.animusicplayer.ui.presentation.showdetails.playlist
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,20 +31,33 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
+import coil.compose.AsyncImage
 import com.crunchry.animusicplayer.data.Song
 import com.crunchry.animusicplayer.data.sampleSongs
 import com.crunchry.animusicplayer.ui.presentation.player.MiniPlayer
 import com.crunchry.animusicplayer.ui.presentation.player.PlayerViewModel
 import com.crunchry.animusicplayer.ui.theme.CrColors
+import kotlin.math.roundToInt
 import com.crunchry.animusicplayer.util.enterPipMode
 
 @UnstableApi
@@ -58,140 +72,141 @@ fun PlaylistScreen(
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
     val currentMediaItem by playerViewModel.currentMediaItem.collectAsStateWithLifecycle()
 
-    Scaffold(
-        containerColor = CrColors.Neutral.Base,
-        bottomBar = {
-            if (!isInPipMode) {
-                if (currentMediaItem != null) {
-                    MiniPlayer(
-                        mediaMetadata = currentMediaItem,
-                        isPlaying = isPlaying,
-                        onPlayPauseClick = { playerViewModel.onPlayPauseClick() },
-                        onNextClick = { playerViewModel.onNextClick() },
-                        onPipMe = { enterPipMode(context) }
-                    )
-                } else {
-                    BottomBar(onStartListening = { playerViewModel.addMediaItemsAndPlay(songs) })
+    val headerHeight = 380.dp
+    val headerHeightPx = with(LocalDensity.current) { headerHeight.roundToPx().toFloat() }
+    val headerOffsetHeightPx = remember { mutableFloatStateOf(0f) }
+
+    val nestedScrollConnection =
+        remember {
+            object : NestedScrollConnection {
+                override fun onPreScroll(
+                    available: Offset,
+                    source: NestedScrollSource,
+                ): Offset {
+                    val delta = available.y
+                    val newOffset = headerOffsetHeightPx.floatValue + delta
+                    headerOffsetHeightPx.floatValue = newOffset.coerceIn(-headerHeightPx, 0f)
+                    return Offset.Zero
                 }
             }
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            PlaylistHeader(onBack = onBack)
-            PlaylistInfo()
-            PlaylistTabs()
-            HorizontalDivider(color = CrColors.Neutral.Base, thickness = 1.dp)
-            SongList(songs)
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PlaylistScreenPreview() {
-    PlaylistScreen(
-        songs = sampleSongs,
-        onBack = {},
-        isInPipMode = false
-    )
-}
-
-@Composable
-private fun PlaylistHeader(onBack: () -> Unit) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(260.dp)
+            .fillMaxSize()
+            .background(CrColors.Neutral.Base)
+            .nestedScroll(nestedScrollConnection),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(CrColors.Neutral.DireWolf),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) { /* Placeholder for band member images */ }
+        val playlistTitle = "Shonen Isekai"
+        val playlistDescription = "Songs recommended from the anime you watch."
+        val playlistCreator = "Crunchyroll"
+        val songCount = 32
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .background(CrColors.Brand.Orange)
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Text(
-                    text = "Shonen Isekai",
-                    color = CrColors.Neutral.White,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+        SongList(songs, headerHeight)
+        CollapsingToolbar(
+            onBack,
+            playlistTitle,
+            playlistDescription,
+            playlistCreator,
+            songCount,
+            headerOffsetHeightPx.floatValue,
+            headerHeight,
+        )
+        if (!isInPipMode) {
+            if (currentMediaItem != null) {
+                val collapsedThreshold = 0.2f
+                val alpha = ((headerOffsetHeightPx.floatValue / headerHeightPx) / (1 - collapsedThreshold) + 1).coerceIn(0f, 1f)
+                MiniPlayer(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .graphicsLayer { this.alpha = alpha }
+                        .background(CrColors.Neutral.Base),
+                    mediaMetadata = currentMediaItem,
+                    isPlaying = isPlaying,
+                    onPlayPauseClick = { playerViewModel.onPlayPauseClick() },
+                    onNextClick = { playerViewModel.onNextClick() },
+                    onPipMe = { enterPipMode(context) }
                 )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Start)
-                    .offset(y = (-240).dp)
-                    .padding(8.dp)
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = CrColors.Neutral.White
-                    )
-                }
+            } else {
+                PlaybackButton(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    headerOffset = headerOffsetHeightPx.floatValue,
+                    headerHeight = headerHeight,
+                    onStartListening = { playerViewModel.addMediaItemsAndPlay(songs) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PlaylistInfo() {
+fun HeroPoster(onBack: () -> Unit) {
+    Box(
+        modifier =
+        Modifier
+            .fillMaxWidth(),
+    ) {
+        AsyncImage(
+            model = sampleSongs[0].artworkUri,
+            contentDescription = "Playlist Poster",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            contentScale = ContentScale.Crop
+        )
+        IconButton(onClick = onBack) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = CrColors.Neutral.White,
+            )
+        }
+    }
+}
+
+@Composable
+fun HeroDetails(
+    title: String,
+    description: String,
+    creator: String,
+    songCount: Int,
+) {
     Column(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp),
     ) {
         Text(
-            text = "Shonen Isekai",
+            text = title,
             color = CrColors.Neutral.White,
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
         )
         Text(
-            text = "Created by Crunchyroll • 32 Songs",
+            text = "Created by $creator • $songCount Songs",
             color = CrColors.Neutral.SilverChalice,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 4.dp)
+            modifier = Modifier.padding(top = 4.dp),
         )
         Text(
-            text = "Songs recommended from the anime you watch.",
+            text = description,
             color = CrColors.Neutral.SilverChalice,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
         )
         HorizontalDivider(color = CrColors.Neutral.SilverChalice.copy(alpha = 0.2f))
     }
 }
 
 @Composable
-private fun PlaylistTabs() {
+fun PlaylistTabs() {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp, horizontal = 16.dp),
-        horizontalArrangement = Arrangement.Start
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.Start,
     ) {
         TabItem("Playlist", isSelected = true)
         Spacer(Modifier.width(24.dp))
@@ -202,19 +217,23 @@ private fun PlaylistTabs() {
 }
 
 @Composable
-private fun TabItem(title: String, isSelected: Boolean) {
+fun TabItem(
+    title: String,
+    isSelected: Boolean,
+) {
     Text(
         text = title,
         color = if (isSelected) CrColors.Neutral.White else CrColors.Neutral.SilverChalice,
         style = MaterialTheme.typography.titleMedium,
-        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
     )
 }
 
 @Composable
-private fun SongList(songs: List<Song>) {
+fun SongList(songs: List<Song>, headerHeight: Dp) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(top = headerHeight)
     ) {
         items(songs) { song ->
             SongListItem(song)
@@ -223,30 +242,31 @@ private fun SongList(songs: List<Song>) {
 }
 
 @Composable
-private fun SongListItem(song: Song) {
+fun SongListItem(song: Song) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp, horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             Icons.Filled.PlayArrow,
             contentDescription = "Play",
             tint = CrColors.Neutral.White,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = song.title,
                 color = CrColors.Neutral.White,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
             )
             Text(
                 text = song.artist,
                 color = CrColors.Neutral.SilverChalice,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
         if (song.isFavorite) {
@@ -254,7 +274,7 @@ private fun SongListItem(song: Song) {
                 Icons.Filled.Star,
                 contentDescription = "Favorite",
                 tint = CrColors.Brand.Orange,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(20.dp),
             )
             Spacer(Modifier.width(12.dp))
         } else {
@@ -265,57 +285,102 @@ private fun SongListItem(song: Song) {
             Icons.Filled.MoreVert,
             contentDescription = "More Options",
             tint = CrColors.Neutral.SilverChalice,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
     }
 }
 
 @Composable
-private fun BottomBar(onStartListening: () -> Unit) {
-    Box(
+fun CollapsingToolbar(
+    onBack: () -> Unit,
+    title: String,
+    description: String,
+    creator: String,
+    songCount: Int,
+    headerOffset: Float,
+    headerHeight: Dp,
+) {
+    val headerHeightPx = with(LocalDensity.current) { headerHeight.toPx() }
+    val collapsedThreshold = 0.2f
+    val alpha = ((headerOffset / headerHeightPx) / (1 - collapsedThreshold) + 1).coerceIn(0f, 1f)
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .height(headerHeight)
+            .offset { IntOffset(0, headerOffset.roundToInt()) }
             .background(CrColors.Neutral.Base)
     ) {
+        HeroPoster(onBack = onBack)
+        HeroDetails(
+            title = title,
+            description = description,
+            creator = creator,
+            songCount = songCount,
+        )
+        PlaylistTabs()
+    }
+}
+
+@Composable
+fun PlaybackButton(
+    modifier: Modifier = Modifier,
+    headerOffset: Float,
+    headerHeight: Dp,
+    onStartListening: () -> Unit
+) {
+    val headerHeightPx = with(LocalDensity.current) { headerHeight.toPx() }
+    val collapsedThreshold = 0.2f
+    val alpha = ((headerOffset / headerHeightPx) / (1 - collapsedThreshold) + 1).coerceIn(0f, 1f)
+
+    Box(
+        modifier =
+        modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .graphicsLayer { this.alpha = alpha }
+            .background(CrColors.Neutral.Base),
+    ) {
         Row(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
         ) {
             Row(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .weight(1f)
                     .background(CrColors.Brand.Orange)
                     .clickable { onStartListening() }
                     .fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
             ) {
                 Icon(
                     Icons.Filled.PlayArrow,
                     contentDescription = null,
                     tint = CrColors.Neutral.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = "START LISTENING",
-                    color = CrColors.Neutral.White,
-                    fontWeight = FontWeight.Bold
+                    color = CrColors.Neutral.Black,
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .width(64.dp)
                     .background(CrColors.Neutral.DireWolf)
                     .fillMaxHeight(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     Icons.Filled.Star,
                     contentDescription = "Bookmark",
                     tint = CrColors.Neutral.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
         }

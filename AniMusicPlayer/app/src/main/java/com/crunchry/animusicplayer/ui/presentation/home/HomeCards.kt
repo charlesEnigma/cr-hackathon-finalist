@@ -22,10 +22,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,7 +47,7 @@ fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
             modifier = Modifier
                 .height(height)
                 .fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder for image/video thumbnail
+            colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf)
         ) {
             Box(contentAlignment = Alignment.TopEnd) {
                 AsyncImage(
@@ -129,14 +130,14 @@ fun PlaylistCard(item: MediaItem, size: Dp, onClick: (MediaItem) -> Unit = {}) {
         modifier = Modifier
             .width(size)
             .padding(end = 8.dp)
-            .clickable { onClick(item) } // we need to navigate to the playlist
+            .clickable { onClick(item) }
     ) {
         Card(
             shape = RoundedCornerShape(4.dp),
             modifier = Modifier
                 .size(size)
                 .fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf) // Placeholder image
+            colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf)
         ) {
             AsyncImage(
                 model = item.imageUrl,

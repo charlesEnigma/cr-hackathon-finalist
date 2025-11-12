@@ -60,6 +60,9 @@ dependencies {
     implementation(libs.bundles.media3)
     implementation(libs.coil)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.kotlinx.collections.immutable)
+
     implementation(libs.bundles.ktor)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

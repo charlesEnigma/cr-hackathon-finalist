@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.crunchry.animusicplayer.data.MediaItem
+import com.crunchry.animusicplayer.data.continueWatching
 import com.crunchry.animusicplayer.ui.presentation.home.viewmodel.HomeUiState
 import com.crunchry.animusicplayer.ui.presentation.home.viewmodel.HomeViewModel
 import com.crunchry.animusicplayer.ui.theme.CrColors
@@ -58,6 +59,7 @@ fun CrunchyrollHomeScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            val mockContinueWatching = continueWatching
             if (uiState.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (uiState.error != null) {
@@ -85,7 +87,6 @@ fun CrunchyrollHomeScreenContent(
                     item {
                         SectionHeader(title = "Continue watching")
                         LazyRow(contentPadding = PaddingValues(horizontal = 8.dp)) {
-                            val mockContinueWatching = List(3) { MediaItem("Initial D", "S1, E1", "") }
                             items(mockContinueWatching) { item ->
                                 ContinueWatchingCard(item = item, width = 280.dp)
                             }

@@ -19,6 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import com.crunchry.animusicplayer.R
 import com.crunchry.animusicplayer.ui.theme.CrColors
 
 /** Top banner with Crunchyroll music marketing content. */
@@ -38,6 +41,14 @@ fun TopBanner() {
                     .align(Alignment.BottomStart)
                     .padding(16.dp)
             ) {
+                AsyncImage(
+                    model = R.drawable.top_browse_music_asset,
+                    contentDescription = "Playlist Poster",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
                 Text(
                     text = "Crunchyroll\nmusic",
                     color = CrColors.Neutral.White,
