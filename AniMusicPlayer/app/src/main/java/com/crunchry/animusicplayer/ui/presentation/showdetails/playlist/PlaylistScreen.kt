@@ -6,6 +6,18 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -13,7 +25,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -27,28 +43,39 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.util.UnstableApi
 import coil.compose.AsyncImage
-import com.crunchry.animusicplayer.R
 import com.crunchry.animusicplayer.data.MediaItem
+import com.crunchry.animusicplayer.ui.presentation.player.MiniPlayer
+import com.crunchry.animusicplayer.ui.presentation.player.PlayerViewModel
+import com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistViewModel
 import com.crunchry.animusicplayer.ui.theme.CrColors
+import com.crunchry.animusicplayer.util.enterPipMode
 import kotlin.math.roundToInt
 
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistViewModel
-
+@UnstableApi
 @Composable
 fun PlaylistScreen(
     selectedSongTitle: String,
     onBack: () -> Unit,
-    playlistViewModel: PlaylistViewModel = hiltViewModel()
+    isInPipMode: Boolean,
+    playlistViewModel: PlaylistViewModel = hiltViewModel(),
+    playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
     val uiState = playlistViewModel.uiState
     val songs = uiState.songs
+    val context = LocalContext.current
+    val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
+    val currentMediaItem by playerViewModel.currentMediaItem.collectAsStateWithLifecycle()
+
     val headerHeight = 380.dp
     val headerHeightPx = with(LocalDensity.current) { headerHeight.roundToPx().toFloat() }
     val headerOffsetHeightPx = remember { mutableFloatStateOf(0f) }
@@ -67,10 +94,8 @@ fun PlaylistScreen(
                 }
             }
         }
-
     Box(
-        modifier =
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(CrColors.Neutral.Base)
             .nestedScroll(nestedScrollConnection),
@@ -79,6 +104,7 @@ fun PlaylistScreen(
         val playlistCreator = "Crunchyroll"
 
         SongList(songs, headerHeight) { song ->
+            // TODO
         }
         CollapsingToolbar(
             onBack,
@@ -88,25 +114,44 @@ fun PlaylistScreen(
             songs.size,
             headerOffsetHeightPx.floatValue,
             headerHeight,
+            songs
         )
         if (uiState.isLoaded) {
-            PlaybackButton(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                onPlayClick = {},
-                onBookmarkClick = {}
-            )
+            if (!isInPipMode) {
+                if (currentMediaItem != null) {
+                    val collapsedThreshold = 0.2f
+                    val alpha = ((headerOffsetHeightPx.floatValue / headerHeightPx) / (1 - collapsedThreshold) + 1).coerceIn(0f, 1f)
+                    MiniPlayer(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .graphicsLayer { this.alpha = alpha }
+                            .background(CrColors.Neutral.Base),
+                        mediaMetadata = currentMediaItem,
+                        isPlaying = isPlaying,
+                        onPlayPauseClick = { playerViewModel.onPlayPauseClick() },
+                        onNextClick = { playerViewModel.onNextClick() },
+                        onPipMe = { enterPipMode(context) }
+                    )
+                } else {
+                    PlaybackButton(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        onPlayClick = { playerViewModel.addMediaItemsAndPlay(songs) },
+                        onBookmarkClick = {}
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun HeroPoster(onBack: () -> Unit) {
+fun HeroPoster(onBack: () -> Unit, songs: List<MediaItem>) {
     Box(
         modifier = Modifier
             .fillMaxWidth(),
     ) {
         AsyncImage(
-            model = R.drawable.music_hero_asset,
+            model = songs.firstOrNull()?.artworkUri,
             contentDescription = "Playlist Poster",
             modifier = Modifier
                 .fillMaxWidth()
@@ -166,9 +211,9 @@ fun HeroDetails(
 fun PlaylistTabs() {
     Row(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp, horizontal = 16.dp),
         horizontalArrangement = Arrangement.Start,
     ) {
         TabItem("Playlist", isSelected = true)
@@ -216,15 +261,15 @@ fun SongListItem(mediaItem: MediaItem, onClick: () -> Unit) {
 
     Row(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(backgroundColor)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null, // Disable ripple effect
-                    onClick = onClick
-                )
-                .padding(vertical = 10.dp, horizontal = 16.dp),
+        Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null, // Disable ripple effect
+                onClick = onClick
+            )
+            .padding(vertical = 10.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
@@ -276,6 +321,7 @@ fun CollapsingToolbar(
     songCount: Int,
     headerOffset: Float,
     headerHeight: Dp,
+    songs: List<MediaItem>
 ) {
     Column(
         modifier = Modifier
@@ -284,7 +330,7 @@ fun CollapsingToolbar(
             .offset { IntOffset(0, headerOffset.roundToInt()) }
             .background(CrColors.Neutral.Base)
     ) {
-        HeroPoster(onBack = onBack)
+        HeroPoster(onBack = onBack, songs = songs)
         HeroDetails(
             title = title,
             description = description,
