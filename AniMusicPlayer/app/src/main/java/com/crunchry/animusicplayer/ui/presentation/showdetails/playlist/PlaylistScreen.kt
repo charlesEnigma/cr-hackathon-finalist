@@ -1,4 +1,4 @@
-package com.crunchry.animusicplayer.ui.playlist
+package com.crunchry.animusicplayer.ui.presentation.showdetails.playlist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
