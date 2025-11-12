@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
@@ -36,11 +35,7 @@ import com.crunchry.animusicplayer.data.MediaItem
 import com.crunchry.animusicplayer.ui.theme.CrColors
 
 @Composable
-fun MediaCard(item: MediaItem, width: Dp, height: Dp, isNetwork: Boolean) {
-    val model: Any? = remember(item.imageUrl, isNetwork) {
-        val numeric = item.imageUrl.toIntOrNull()
-        if (!isNetwork && numeric != null) numeric else item.imageUrl.takeIf { it.isNotBlank() }
-    }
+fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
     Column(
         modifier = Modifier
             .width(width)
@@ -130,11 +125,7 @@ fun ContinueWatchingCard(item: MediaItem, width: Dp) {
 
 /** Square playlist card supporting navigation click. */
 @Composable
-fun PlaylistCard(item: MediaItem, size: Dp, isNetwork: Boolean, onClick: (MediaItem) -> Unit = {}) {
-    val model: Any? = remember(item.imageUrl, isNetwork) {
-        val numeric = item.imageUrl.toIntOrNull()
-        if (!isNetwork && numeric != null) numeric else item.imageUrl.takeIf { it.isNotBlank() }
-    }
+fun PlaylistCard(item: MediaItem, size: Dp, onClick: (MediaItem) -> Unit = {}) {
     Column(
         modifier = Modifier
             .width(size)
@@ -150,8 +141,8 @@ fun PlaylistCard(item: MediaItem, size: Dp, isNetwork: Boolean, onClick: (MediaI
         ) {
             AsyncImage(
                 model = item.imageUrl,
-                placeholder = model as Painter?,
-                error = rememberVectorPainter(),
+                placeholder = rememberVectorPainter(Icons.Default.MusicNote),
+                error = rememberVectorPainter(Icons.Default.MusicNote),
                 contentDescription = item.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
