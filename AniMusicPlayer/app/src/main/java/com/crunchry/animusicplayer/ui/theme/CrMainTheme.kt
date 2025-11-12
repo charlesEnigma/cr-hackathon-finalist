@@ -4,15 +4,14 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
     primary = CrColors.Brand.Orange,
-    background = Color.Black,
-    surface = Color.Black,
-    onPrimary = Color.White,
-    onBackground = Color.White,
-    onSurface = Color.White,
+    background = CrColors.Neutral.Base, // unified near-black
+    surface = CrColors.Neutral.Base,
+    onPrimary = CrColors.Neutral.White,
+    onBackground = CrColors.Neutral.White,
+    onSurface = CrColors.Neutral.White,
 )
 
 @Composable

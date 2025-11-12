@@ -14,6 +14,7 @@ object CrColors {
 
     object Brand {
         val Orange = Color(0xFFFF5E00)
+        val OrangeDark = Color(0xFFE05200) // unified dark variant
         val Taupe = Color(0xFFECE1C2)
     }
 
