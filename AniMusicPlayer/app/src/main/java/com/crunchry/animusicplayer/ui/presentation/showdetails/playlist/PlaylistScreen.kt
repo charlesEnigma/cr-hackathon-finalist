@@ -1,31 +1,80 @@
 package com.crunchry.animusicplayer.ui.presentation.showdetails.playlist
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.util.UnstableApi
 import com.crunchry.animusicplayer.data.Song
+import com.crunchry.animusicplayer.data.sampleSongs
+import com.crunchry.animusicplayer.ui.presentation.player.MiniPlayer
+import com.crunchry.animusicplayer.ui.presentation.player.PlayerViewModel
 import com.crunchry.animusicplayer.ui.theme.CrColors
+import com.crunchry.animusicplayer.util.enterPipMode
 
+@UnstableApi
 @Composable
 fun PlaylistScreen(
     songs: List<Song>,
     onBack: () -> Unit,
+    isInPipMode: Boolean,
+    playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+    val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
+    val currentMediaItem by playerViewModel.currentMediaItem.collectAsStateWithLifecycle()
+
     Scaffold(
         containerColor = CrColors.Neutral.Base,
-        bottomBar = { BottomBar(currentSongTitle = songs.firstOrNull()?.title ?: "") }
+        bottomBar = {
+            if (!isInPipMode) {
+                if (currentMediaItem != null) {
+                    MiniPlayer(
+                        mediaMetadata = currentMediaItem,
+                        isPlaying = isPlaying,
+                        onPlayPauseClick = { playerViewModel.onPlayPauseClick() },
+                        onNextClick = { playerViewModel.onNextClick() },
+                        onPipMe = { enterPipMode(context) }
+                    )
+                } else {
+                    BottomBar(onStartListening = { playerViewModel.addMediaItemsAndPlay(songs) })
+                }
+            }
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -39,6 +88,16 @@ fun PlaylistScreen(
             SongList(songs)
         }
     }
+}
+
+@Preview
+@Composable
+fun PlaylistScreenPreview() {
+    PlaylistScreen(
+        songs = sampleSongs,
+        onBack = {},
+        isInPipMode = false
+    )
 }
 
 @Composable
@@ -86,7 +145,7 @@ private fun PlaylistHeader(onBack: () -> Unit) {
             ) {
                 IconButton(onClick = onBack) {
                     Icon(
-                        Icons.Filled.ArrowBack,
+                        Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         tint = CrColors.Neutral.White
                     )
@@ -212,7 +271,7 @@ private fun SongListItem(song: Song) {
 }
 
 @Composable
-private fun BottomBar(currentSongTitle: String) {
+private fun BottomBar(onStartListening: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -226,6 +285,7 @@ private fun BottomBar(currentSongTitle: String) {
                 modifier = Modifier
                     .weight(1f)
                     .background(CrColors.Brand.Orange)
+                    .clickable { onStartListening() }
                     .fillMaxHeight(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center

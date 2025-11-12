@@ -37,7 +37,11 @@ class HomeViewModel @Inject constructor(
             songRecommendations = songs
         )
     }
-        .catch { e -> emit(HomeUiState(isLoading = false, error = e.message)) }
+        .catch { e ->  emit(HomeUiState(
+            isLoading = false,
+            animeRecommendations = listOf<MediaItem>(MediaItem("Initial D", "S1, E1", "") ,MediaItem("Initial D", "S1, E1", "")),
+            songRecommendations = listOf(MediaItem("K", "", ""))
+        )) } // emit(HomeUiState(isLoading = false, error = e.message)) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
