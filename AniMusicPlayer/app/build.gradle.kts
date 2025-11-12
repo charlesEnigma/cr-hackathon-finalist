@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.kotlinx.collections.immutable)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("com.jakewharton.timber:timber:5.0.1")
 
     implementation(libs.bundles.ktor)
     implementation(libs.hilt.android)

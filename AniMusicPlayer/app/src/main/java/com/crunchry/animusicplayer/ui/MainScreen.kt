@@ -1,24 +1,26 @@
 package com.crunchry.animusicplayer.ui
 
-import androidx.compose.foundation.layout.padding
+import PlaylistScreen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.crunchry.animusicplayer.SplashScreenV2
-import com.crunchry.animusicplayer.data.Song
 import com.crunchry.animusicplayer.navigation.Screen
 import com.crunchry.animusicplayer.ui.presentation.home.HomeScreen
-import com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistScreen
 import com.crunchry.animusicplayer.ui.screens.BrowseScreen
 import com.crunchry.animusicplayer.ui.screens.FavoritesScreen
 import com.crunchry.animusicplayer.ui.screens.ProfileScreen
@@ -32,7 +34,9 @@ fun MainScreen() {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
 
-        val showNavigationSuite = Screen.mainScreens.any { it.route == currentDestination?.route }
+        val showNavigationSuite = currentDestination?.hierarchy?.any { dest ->
+            Screen.mainScreens.any { it.route == dest.route } || dest.route == Screen.Playlist.route
+        } == true
 
         NavigationSuiteScaffold(
             navigationSuiteItems = {
@@ -60,8 +64,9 @@ fun MainScreen() {
                 NavHost(
                     navController = navController,
                     startDestination = Screen.Splash.route,
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = Modifier//.padding(innerPadding)
                 ) {
+                    val inner = innerPadding
                     composable(Screen.Splash.route) {
                         SplashScreenV2(onFinished = {
                             navController.navigate(Screen.Home.route) {
@@ -74,10 +79,24 @@ fun MainScreen() {
                     composable(Screen.Browse.route) { BrowseScreen() }
                     composable(Screen.Store.route) { StoreScreen() }
                     composable(Screen.Profile.route) { ProfileScreen() }
-                    composable(Screen.Playlist.route) { backStackEntry ->
-                        val itemTitle = backStackEntry.arguments?.getString("itemTitle")
-                        val songs = List(10) { Song("Song $it", "Artist $it", it % 3 == 0) }
-                        PlaylistScreen(songs = songs, onBack = { navController.popBackStack() })
+                    composable(
+                        route = Screen.Playlist.route,
+                        arguments = listOf(
+                            navArgument("selectedSongTitle") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val selectedSongTitle = backStackEntry.arguments?.getString("selectedSongTitle")
+                        if (selectedSongTitle != null) {
+                            val navGraphBackStackEntry = remember(backStackEntry) {
+                                navController.getBackStackEntry(Screen.Home.route)
+                            }
+                            val playlistViewModel: com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistViewModel = hiltViewModel(navGraphBackStackEntry)
+                            PlaylistScreen(
+                                selectedSongTitle = selectedSongTitle,
+                                onBack = { navController.popBackStack() },
+                                playlistViewModel = playlistViewModel
+                            )
+                        }
                     }
                 }
             }

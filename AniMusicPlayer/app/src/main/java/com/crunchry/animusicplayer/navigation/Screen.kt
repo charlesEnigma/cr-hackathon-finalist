@@ -19,11 +19,11 @@ sealed class Screen(
     object Browse : Screen("browse", "Browse", Icons.Default.Search)
     // ⭐️ ADD THE MISSING STORE DESTINATION HERE
     object Store : Screen("store", "Store", Icons.Default.ShoppingCart)
+    // Simplified playlist route: only pass the selected song title; songs list stored in SavedStateHandle
+    object Playlist : Screen("playlist/{selectedSongTitle}")
     object Profile : Screen("profile", "Profile", Icons.Default.AccountBox)
-    object Playlist : Screen("playlist/{itemTitle}")
 
     companion object {
         val mainScreens = listOf(Home, MyList, Browse, Store, Profile)
     }
 }
-

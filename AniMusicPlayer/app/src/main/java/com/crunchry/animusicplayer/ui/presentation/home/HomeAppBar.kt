@@ -10,6 +10,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.crunchry.animusicplayer.ui.theme.CrColors
 
 /**
@@ -26,11 +27,10 @@ fun HomeAppBar(
     onSearchClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val darkBackground = CrColors.Neutral.Base
     TopAppBar(
         modifier = modifier,
         title = { /* No title per design */ },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = darkBackground),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
         actions = {
             IconButton(onClick = onCastClick) {
                 Icon(
