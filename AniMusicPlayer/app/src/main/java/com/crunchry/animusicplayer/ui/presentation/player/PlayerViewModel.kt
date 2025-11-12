@@ -2,15 +2,16 @@ package com.crunchry.animusicplayer.ui.presentation.player
 
 import android.app.Application
 import android.content.ComponentName
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
-import com.crunchry.animusicplayer.data.Song
+import androidx.media3.common.MediaItem as AndroidXMediaItem
+import com.crunchry.animusicplayer.data.MediaItem
 import com.crunchry.animusicplayer.service.MediaPlaybackService
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
@@ -63,16 +64,16 @@ class PlayerViewModel @Inject constructor(
         )
     }
 
-    fun addMediaItemsAndPlay(songs: List<Song>) {
+    fun addMediaItemsAndPlay(songs: List<MediaItem>) {
         val mediaItems = songs.map { item ->
-            MediaItem.Builder()
+            AndroidXMediaItem.Builder()
                 .setUri(item.videoUri)
-                .setMediaId(item.videoUri.toString())
+                .setMediaId(item.videoUri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
                         .setTitle(item.title)
                         .setArtist(item.artist)
-                        .setArtworkUri(item.artworkUri)
+                        .setArtworkUri(item.artworkUri.toUri())
                         .build()
                 )
                 .build()

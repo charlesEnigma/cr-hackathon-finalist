@@ -3,6 +3,7 @@ package com.crunchry.animusicplayer.ui
 import PlaylistScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -105,7 +106,7 @@ fun MainScreen(
                         navController = navController,
                         startDestination = Screen.Splash.route,
                         modifier = Modifier.padding(innerPadding)
-                        modifier = Modifier//.padding(innerPadding)
+                    ) {
                         composable(Screen.Splash.route) {
                             SplashScreenV2(onFinished = {
                                 navController.navigate(Screen.Home.route) {
@@ -133,8 +134,9 @@ fun MainScreen(
                             }
                             val playlistViewModel: com.crunchry.animusicplayer.ui.presentation.showdetails.playlist.PlaylistViewModel = hiltViewModel(navGraphBackStackEntry)
                             PlaylistScreen(
-                                selectedSongTitle = selectedSongTitle,
+                                selectedSongTitle = selectedSongTitle ?: "",
                                 onBack = { navController.popBackStack() },
+                                isInPipMode = isInPipMode,
                                 playlistViewModel = playlistViewModel,
                                 playerViewModel = playerViewModel
                             )

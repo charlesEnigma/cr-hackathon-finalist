@@ -49,7 +49,9 @@ class HomeViewModel @Inject constructor(
             MediaItem(
                 title = anime.title,
                 subtitle = "",
-                imageUrl = anime.posterTall
+                videoUri = anime.posterTall,
+                artist = "",
+                artworkUri = anime.posterTall
             )
         }
     }
@@ -59,7 +61,9 @@ class HomeViewModel @Inject constructor(
             MediaItem(
                 title = song.title,
                 subtitle = song.artist,
-                imageUrl = song.albumArtUrl
+                videoUri = song.albumArtUrl,
+                artist = "",
+                artworkUri = song.albumArtUrl
             )
         }
     }

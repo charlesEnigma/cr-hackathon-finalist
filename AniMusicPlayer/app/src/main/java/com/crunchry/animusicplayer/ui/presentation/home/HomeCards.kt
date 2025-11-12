@@ -32,6 +32,7 @@ import com.crunchry.animusicplayer.R
 import com.crunchry.animusicplayer.data.MediaItem
 import com.crunchry.animusicplayer.ui.theme.CrColors
 
+
 @Composable
 fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
     Column(
@@ -49,8 +50,7 @@ fun MediaCard(item: MediaItem, width: Dp, height: Dp) {
         ) {
             Box(contentAlignment = Alignment.TopEnd) {
                 AsyncImage(
-                    model = item.imageUrl,
-                    placeholder = rememberVectorPainter(Icons.Default.MusicNote),
+                    model = item.artworkUri,
                     error = rememberVectorPainter(Icons.Default.MusicNote),
                     contentDescription = item.title,
                     contentScale = ContentScale.Crop,
@@ -136,8 +136,7 @@ fun PlaylistCard(item: MediaItem, size: Dp, onClick: (MediaItem) -> Unit = {}) {
             colors = CardDefaults.cardColors(containerColor = CrColors.Neutral.DireWolf)
         ) {
             AsyncImage(
-                model = item.imageUrl,
-                placeholder = rememberVectorPainter(Icons.Default.MusicNote),
+                model = item.artworkUri,
                 error = rememberVectorPainter(Icons.Default.MusicNote),
                 contentDescription = item.title,
                 contentScale = ContentScale.Crop,

@@ -7,7 +7,7 @@ data class MediaItem(
     val title: String,
     val subtitle: String,
     val artist: String = "",
-    val song: String = "",
-    val imageUrl: String,
+    val artworkUri: String,
+    val videoUri: String,
     val isFavorite: Boolean = false
 )
